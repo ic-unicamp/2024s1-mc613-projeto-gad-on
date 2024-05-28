@@ -50,6 +50,7 @@ end
 assign VGA_HS = (contador <= 96) ? 0 : 1;
 assign VGA_VS = (linhas <= 2) ? 0 : 1;
 assign ativo = ((contador > 144) && (contador <784)  && (linhas >= 35) && (linhas <= 515))? 1 : 0;
+
 // COORDENADAS X E Y PARA O VGA
 wire [11:0] x;
 wire [11:0] y;
@@ -63,7 +64,9 @@ assign  y = linhas - 35;
 
 
 
-//CLOCK DE QUEDA DO SHAPE
+// CLOCK DE QUEDA DO SHAPE
+// a ideia e usa-lo como uma flag na logica principal
+// se for 0, o bloco cai um pixel, se nao, continua como estava
 reg def2 = 0;
 reg [23:0] count_shape = 0;
 reg SHAPE_CLK;
@@ -89,11 +92,15 @@ end
 
 
 
-//SETANDO O MAPA MANUALMENTE PARA TESTES
-reg [0:2] map [0:2];
+//CONTROLADOR DO MAPA (logica principal do jogo)
+// aqui, temos 20 linhas e 10 segmentos de 5 bits para cada cor
+// esse sera o bloco de always mais extenso
+reg [0:49] map [0:19];
 
 always @(posedge CLOCK_50) begin 
-	map[1][1] = 1'b1;
+	//linha, coluna, respectivamente
+	//aqui, coloquei um pixel como sendo 1
+	map[18][5:9] = 5'b00001;
 end
 
 
@@ -103,32 +110,36 @@ end
 
 
 //CONTROLADOR DE VIDEO DO MAPA
-reg[7:0] i;
-reg[7:0] j;
+//permite a impressao de ate 31 cores
+//aqui, so foi testado o branco (1) e o vazio (0)
+//para criar o carrossel e a bag, basta criar 2 matrizes adicionais e adicionar os condicionais no bloco de always
+reg[9:0] i;
+reg[9:0] j;
 wire[11:0] x_map;
-wire[11:0]  y_map;
-assign x_map = 320 - 18;
-assign y_map = 240 - 18;
+wire[11:0] y_map;
+assign x_map = 320-9-76;
+assign y_map = 10;
 
 always @(VGA_CLK) begin
-	if(x >= x_map && x < x_map + 36 && y >= y_map && y < y_map + 36) begin
-    for(i = 0; i < 3; i = i + 1) begin
-		for(j = 0; j < 3; j = j + 1) begin
-			if((x >= i*12 +x_map) && (x < i*12 + 12+x_map) && (y >= j*12 + y_map) && (y < j*12 + 12+y_map)) begin 
-				VGA_R = ativo ?  (map[i][j] == 1 ? 255: 155) : 0;
-				VGA_G = ativo ?  (map[i][j] == 1 ? 255: 34) : 0;
-				VGA_B = ativo ?  (map[i][j] == 1 ? 255: 255) : 0;
+	if(x >= x_map && x < x_map +190 && y >= y_map && y < y_map + 460) begin
+    for(i = 0; i < 20; i = i + 1) begin
+		for(j = 0; j < 10; j = j + 1) begin
+			if((x >= j*19 +x_map) && (x < j*19 + 19+x_map) && (y >= i*23 + y_map) && (y < i*23 + 23+y_map)) begin 
+				VGA_R = ativo ?  (map[i][j*5 +: 5] == 5'b00001 ? 255: 155) : 0;
+				VGA_G = ativo ?  (map[i][j*5 +: 5] == 5'b00001 ? 255: 34) : 0;
+				VGA_B = ativo ?  (map[i][j*5 +: 5] == 5'b00001 ? 255: 255) : 0;
 			end
 		end
 	end
 	end
+	//else if x, y dentro da regiao da bag ou do carrosel (sera implementado futuramente)
 	else begin 
 		VGA_R = ativo ? 34 : 0;
 		VGA_G = ativo ? 34 : 0;
 		VGA_B = ativo ? 34 : 0;
 	end
+	
 	 
 end
 
 endmodule
-
