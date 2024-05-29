@@ -67,17 +67,18 @@ assign  y = linhas - 35;
 // CLOCK DE QUEDA DO SHAPE
 // a ideia e usa-lo como uma flag na logica principal
 // se for 0, o bloco cai um pixel, se nao, continua como estava
-reg def2 = 0;
-reg [23:0] count_shape = 0;
+
+reg def5 = 0;
+reg [28:0] count_shape = 0;
 reg SHAPE_CLK;
 
 always @(posedge CLOCK_50) begin
-	if(SW[0] || ~def2) begin
+	if(SW[0] || ~def5) begin
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
-		def2 = 1;
+		def5 = 1;
 	end
-	if (count_shape ==  24'b0001011111010111100001) begin
+	if (count_shape ==  29'b010111110101111000000000000) begin
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
@@ -92,23 +93,65 @@ end
 
 
 
+reg def3 = 0;
+reg[11:0] x_shape;
+reg[11:0] y_shape;
+reg[11:0] temp;
+reg bottom;
+reg faz_alguma_coisa;
+reg[3:0] op_passada;
 //CONTROLADOR DO MAPA (logica principal do jogo)
 // aqui, temos 20 linhas e 10 segmentos de 5 bits para cada cor
 // esse sera o bloco de always mais extenso
 reg [0:49] map [0:19];
 
 always @(posedge CLOCK_50) begin 
-	//linha, coluna, respectivamente
+	//linha, coluna, respectivamente map[linha][coluna*5+:4]
 	//aqui, coloquei um pixel como sendo 1
-	map[0][5:9] = 1;
-	map[1][5:9] = 2;
-	map[2][5:9] = 3;
-	map[3][5:9] = 4;
-	map[4][5:9] = 5;
-	map[5][5:9] = 6;
-	map[6][5:9] = 7;
-	map[7][5:9] = 8;
-	map[8][5:9] = 9;
+	if(~def3) begin
+		y_shape <= 0;
+		x_shape <= 0;
+		map[y_shape][x_shape+:5] <= 11;
+		op_passada <= 0;
+		faz_alguma_coisa <= 0;
+		def3 <= 1;
+	end
+	
+	if(op_passada != KEY) begin
+		faz_alguma_coisa <= 1;
+	end
+	else begin
+		faz_alguma_coisa <= 0;
+	end
+	
+	if(faz_alguma_coisa) begin
+		if(~KEY[1] && x_shape > 0) begin
+			map[y_shape][(x_shape-5)+:5] <= 11;
+			map[y_shape][x_shape+:5] <= 0;
+			x_shape <= x_shape - 5;
+		end
+		else if(~KEY[0] && x_shape < 45) begin
+			map[y_shape][(x_shape+5)+:5] = 11;
+			map[y_shape][x_shape+:5] <= 0;
+			x_shape <= x_shape + 5;
+		end
+	end
+	
+	op_passada <= KEY;
+	
+	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin 
+		map[y_shape][x_shape+:5] = map[y_shape][x_shape+:5] - 10;
+		y_shape <= 0;
+		x_shape <= 0;
+		map[y_shape][x_shape+:5] <= 11;
+	end
+	if(~SHAPE_CLK ) begin 
+		map[y_shape][x_shape+:5] <= 0;
+		map[y_shape+1][x_shape+:5] <= 11;
+		y_shape <= y_shape + 1;
+	end
+		
+
 end
 
 
@@ -126,7 +169,7 @@ wire[11:0] y_map;
 assign x_map = 320-9-76;
 assign y_map = 10;
 
-always @(VGA_CLK) begin
+always @(posedge VGA_CLK) begin
 
 
 	if(x >= x_map && x < x_map +190 && y >= y_map && y < y_map + 460) begin
