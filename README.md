@@ -2,12 +2,12 @@
 
 Grupo:
 
+- RA 260355 - Alexandre Leandro Seixas Adler 
+- RA 183710 - Davi Gabriel Bandeira Coutinho 
 - RA 217600 - Gabriel Pereira Viterbo
-- RA - Nome
-- RA - Nome
-
+- 
 ## Descrição
 
-Descrição do projeto.
+Tetris Brabo
 
 
