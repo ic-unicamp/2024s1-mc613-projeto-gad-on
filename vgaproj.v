@@ -78,7 +78,7 @@ always @(posedge CLOCK_50) begin
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b010111110101111000000000000) begin
+	if (count_shape ==  29'b001011111010111100000000000) begin //default 29'b010111110101111000000000000
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
@@ -91,11 +91,13 @@ end
 
 
 
+//´pp
+
 
 
 reg def3 = 0;
-reg[11:0] x_shape;
-reg[11:0] y_shape;
+reg[11:0] x_shape = 20;
+reg[11:0] y_shape = 0;
 reg[11:0] temp;
 reg bottom;
 reg faz_alguma_coisa;
@@ -110,7 +112,7 @@ always @(posedge CLOCK_50) begin
 	//aqui, coloquei um pixel como sendo 1
 	if(~def3) begin
 		y_shape <= 0;
-		x_shape <= 0;
+		x_shape <= 20; //comeca no meio!
 		map[y_shape][x_shape+:5] <= 11;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
@@ -124,13 +126,13 @@ always @(posedge CLOCK_50) begin
 		faz_alguma_coisa <= 0;
 	end
 	
-	if(faz_alguma_coisa) begin
-		if(~KEY[1] && x_shape > 0) begin
+	if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
+		if(~KEY[1] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0) begin
 			map[y_shape][(x_shape-5)+:5] <= 11;
 			map[y_shape][x_shape+:5] <= 0;
 			x_shape <= x_shape - 5;
 		end
-		else if(~KEY[0] && x_shape < 45) begin
+		else if(~KEY[0] && x_shape < 45 && map[y_shape][(x_shape+5)+:5] == 0) begin
 			map[y_shape][(x_shape+5)+:5] = 11;
 			map[y_shape][x_shape+:5] <= 0;
 			x_shape <= x_shape + 5;
@@ -139,13 +141,13 @@ always @(posedge CLOCK_50) begin
 	
 	op_passada <= KEY;
 	
-	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin 
+	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin //checa bottom 
 		map[y_shape][x_shape+:5] = map[y_shape][x_shape+:5] - 10;
 		y_shape <= 0;
-		x_shape <= 0;
+		x_shape <= 20; //comeca no meio!
 		map[y_shape][x_shape+:5] <= 11;
 	end
-	if(~SHAPE_CLK ) begin 
+	else if(~SHAPE_CLK ) begin //movimento pra baixo
 		map[y_shape][x_shape+:5] <= 0;
 		map[y_shape+1][x_shape+:5] <= 11;
 		y_shape <= y_shape + 1;
