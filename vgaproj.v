@@ -63,7 +63,6 @@ assign  y = linhas - 35;
 
 
 
-
 // CLOCK DE QUEDA DO SHAPE
 // a ideia e usa-lo como uma flag na logica principal
 // se for 0, o bloco cai um pixel, se nao, continua como estava
@@ -78,7 +77,7 @@ always @(posedge CLOCK_50) begin
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b001011111010111100000000000) begin //default 29'b010111110101111000000000000
+	if (count_shape ==  29'b010111110101111000000000000) begin
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
@@ -91,13 +90,11 @@ end
 
 
 
-//´pp
-
 
 
 reg def3 = 0;
-reg[11:0] x_shape = 20;
-reg[11:0] y_shape = 0;
+reg[11:0] x_shape;
+reg[11:0] y_shape;
 reg[11:0] temp;
 reg bottom;
 reg faz_alguma_coisa;
@@ -112,7 +109,7 @@ always @(posedge CLOCK_50) begin
 	//aqui, coloquei um pixel como sendo 1
 	if(~def3) begin
 		y_shape <= 0;
-		x_shape <= 20; //comeca no meio!
+		x_shape <= 0;
 		map[y_shape][x_shape+:5] <= 11;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
@@ -138,16 +135,16 @@ always @(posedge CLOCK_50) begin
 			x_shape <= x_shape + 5;
 		end
 	end
-	
+
 	op_passada <= KEY;
 	
-	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin //checa bottom 
+	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin 
 		map[y_shape][x_shape+:5] = map[y_shape][x_shape+:5] - 10;
 		y_shape <= 0;
-		x_shape <= 20; //comeca no meio!
+		x_shape <= 0;
 		map[y_shape][x_shape+:5] <= 11;
 	end
-	else if(~SHAPE_CLK ) begin //movimento pra baixo
+	if(~SHAPE_CLK ) begin 
 		map[y_shape][x_shape+:5] <= 0;
 		map[y_shape+1][x_shape+:5] <= 11;
 		y_shape <= y_shape + 1;
@@ -171,70 +168,74 @@ wire[11:0] y_map;
 assign x_map = 320-9-76;
 assign y_map = 10;
 
-always @(posedge VGA_CLK) begin
+always @(*) begin
 
 
 	if(x >= x_map && x < x_map +190 && y >= y_map && y < y_map + 460) begin
 	
     for(i = 0; i < 20; i = i + 1) begin
-		for(j = 0; j < 10; j = j + 1) begin
-			if((x >= j*19 +x_map) && (x < j*19 + 19+x_map) && (y >= i*23 + y_map) && (y < i*23 + 23+y_map)) begin 
-			
-				if(map[i][j*5 +: 5] == 0) begin  //fundo cod 0
-					VGA_R = ativo ?  (90) : 0;
-					VGA_G = ativo ?  (90) : 0;
-					VGA_B = ativo ?  (90) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 1 || map[i][j*5 +: 5] == 11) begin //branco cod 1 ou 11
-					VGA_R = ativo ?  (255) : 0;
-					VGA_G = ativo ?  (255) : 0;
-					VGA_B = ativo ?  (255) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 2 || map[i][j*5 +: 5] == 12) begin //ciano cod 2 ou 12
-					VGA_R = ativo ?  (0) : 0;
-					VGA_G = ativo ?  (255) : 0;
-					VGA_B = ativo ?  (255) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 3 || map[i][j*5 +: 5] == 13) begin //amarelo cod 3 ou 13
-					VGA_R = ativo ?  (255) : 0;
-					VGA_G = ativo ?  (255) : 0;
-					VGA_B = ativo ?  (0) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 4 || map[i][j*5 +: 5] == 14) begin //roxo cod 4 ou 14
-					VGA_R = ativo ?  (128) : 0;
-					VGA_G = ativo ?  (0) : 0;
-					VGA_B = ativo ?  (128) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 5 || map[i][j*5 +: 5] == 15) begin //verde cod 5 ou 15
-					VGA_R = ativo ?  (0) : 0;
-					VGA_G = ativo ?  (255) : 0;
-					VGA_B = ativo ?  (0) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 6 || map[i][j*5 +: 5] == 16) begin //vermelho cod 6 ou 16
-					VGA_R = ativo ?  (255) : 0;
-					VGA_G = ativo ?  (0) : 0;
-					VGA_B = ativo ?  (0) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 7 || map[i][j*5 +: 5] == 17) begin //azul cod 7 ou 17
-					VGA_R = ativo ?  (0) : 0;
-					VGA_G = ativo ?  (0) : 0;
-					VGA_B = ativo ?  (255) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 8 || map[i][j*5 +: 5] == 18) begin //laranja cod 8 ou 18
-					VGA_R = ativo ?  (255) : 0;
-					VGA_G = ativo ?  (127) : 0;
-					VGA_B = ativo ?  (0) : 0;
-				end
-				else if(map[i][j*5 +: 5] == 9 || map[i][j*5 +: 5] == 19) begin //cinza cod 9 ou 19
-					VGA_R = ativo ?  (127) : 0;
-					VGA_G = ativo ?  (127) : 0;
-					VGA_B = ativo ?  (127) : 0;
-				end
-				
-				
-			end
-		end
-	end
+        for(j = 0; j < 10; j = j + 1) begin
+            if((x >= j*19 +x_map) && (x < j*19 + 19+x_map) && (y >= i*23 + y_map) && (y < i*23 + 23+y_map)) begin 
+                case(map[i][j*5 +: 5])
+                    0: begin //fundo cod 0
+                        VGA_R = ativo ? 90 : 0;
+                        VGA_G = ativo ? 90 : 0;
+                        VGA_B = ativo ? 90 : 0;
+                    end
+                    1, 11: begin //branco cod 1 ou 11
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 255 : 0;
+                    end
+                    2, 12: begin //ciano cod 2 ou 12
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 255 : 0;
+                    end
+                    3, 13: begin //amarelo cod 3 ou 13
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 0 : 0;
+                    end
+                    4, 14: begin //roxo cod 4 ou 14
+                        VGA_R = ativo ? 128 : 0;
+                        VGA_G = ativo ? 0 : 0;
+                        VGA_B = ativo ? 128 : 0;
+                    end
+                    5, 15: begin //verde cod 5 ou 15
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 0 : 0;
+                    end
+                    6, 16: begin //vermelho cod 6 ou 16
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 0 : 0;
+                        VGA_B = ativo ? 0 : 0;
+                    end
+                    7, 17: begin //azul cod 7 ou 17
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 0 : 0;
+                        VGA_B = ativo ? 255 : 0;
+                    end
+                    8, 18: begin //laranja cod 8 ou 18
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 0 : 0;
+                    end
+                    9, 19: begin //cinza cod 9 ou 19
+                        VGA_R = ativo ? 127 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 127 : 0;
+                    end
+                    default: begin
+                        VGA_R = 0;
+                        VGA_G = 0;
+                        VGA_B = 0;
+                    end
+                endcase
+            end
+        end
+    end
 	end
 	//else if x, y dentro da regiao da bag ou do carrosel (sera implementado futuramente)
 	else begin 
