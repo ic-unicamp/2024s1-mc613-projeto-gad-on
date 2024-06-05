@@ -69,21 +69,24 @@ assign  y = linhas - 35;
 
 reg def5 = 0;
 reg [28:0] count_shape = 0;
+reg [3:0] num_shape = 0;
 reg SHAPE_CLK;
 
 always @(posedge CLOCK_50) begin
 	if(SW[0] || ~def5) begin
 		count_shape <= 0;
+		num_shape <= 0;
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b010111110101111000000000000) begin
+	if (count_shape ==  29'b000010111110101111000000000) begin //Acelerado 8 vezes
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
 	else begin
 		count_shape <= count_shape + 1;
 		SHAPE_CLK <= 1;
+		num_shape <= num_shape + 1;
 	end
 end
 
@@ -103,6 +106,8 @@ reg[3:0] op_passada;
 // aqui, temos 20 linhas e 10 segmentos de 5 bits para cada cor
 // esse sera o bloco de always mais extenso
 reg [0:49] map [0:19];
+reg [0:49] new = 0;
+reg [9:0] i1 = 0, j1 = 0;
 
 always @(posedge CLOCK_50) begin 
 	//linha, coluna, respectivamente map[linha][coluna*5+:4]
@@ -110,6 +115,7 @@ always @(posedge CLOCK_50) begin
 	if(~def3) begin
 		y_shape <= 0;
 		x_shape <= 0;
+		bottom <= 0;
 		map[y_shape][x_shape+:5] <= 11;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
@@ -130,7 +136,7 @@ always @(posedge CLOCK_50) begin
 			x_shape <= x_shape - 5;
 		end
 		else if(~KEY[0] && x_shape < 45 && map[y_shape][(x_shape+5)+:5] == 0) begin
-			map[y_shape][(x_shape+5)+:5] = 11;
+			map[y_shape][(x_shape+5)+:5] <= 11;
 			map[y_shape][x_shape+:5] <= 0;
 			x_shape <= x_shape + 5;
 		end
@@ -139,18 +145,28 @@ always @(posedge CLOCK_50) begin
 	op_passada <= KEY;
 	
 	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin 
-		map[y_shape][x_shape+:5] = map[y_shape][x_shape+:5] - 10;
+		map[y_shape][x_shape+:5] <= map[y_shape][x_shape+:5] - 10;
 		y_shape <= 0;
 		x_shape <= 0;
 		map[y_shape][x_shape+:5] <= 11;
+		bottom <= 1;
 	end
-	if(~SHAPE_CLK ) begin 
+	for(i1 = 19; i1 > 0; i1  = i1-1) begin
+		if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
+			for(j1 = i1; j1 > 0; j1 = j1-1) begin
+				map[j1] <= map[j1-1];
+			end
+			map[0] <= new;
+		end
+	end
+	if (~SHAPE_CLK ) begin 
 		map[y_shape][x_shape+:5] <= 0;
 		map[y_shape+1][x_shape+:5] <= 11;
 		y_shape <= y_shape + 1;
+		bottom <= 0;
 	end
-		
-
+	
+	
 end
 
 
@@ -239,9 +255,9 @@ always @(*) begin
 	end
 	//else if x, y dentro da regiao da bag ou do carrosel (sera implementado futuramente)
 	else begin 
-		VGA_R = ativo ? 34 : 0;
-		VGA_G = ativo ? 34 : 0;
-		VGA_B = ativo ? 34 : 0;
+		VGA_R = ativo ? 128 : 0;
+		VGA_G = ativo ? 0 : 0;
+		VGA_B = ativo ? 128 : 0;
 	end
 	
 	 
