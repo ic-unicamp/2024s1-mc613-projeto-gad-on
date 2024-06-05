@@ -1,9 +1,4 @@
 //Bug do score corrigido, best_score está perfeito
-//Caro grupo, venho por meio deste, comunicar-lhes que não pude certificar-me da corretude deste código,
-//devido a insuficiência de tempo que tive para dedicar-me ao projeto. Sei que isso é imperdoável, mas 
-//rogo-vos que usem de misericórdia para comigo. Apesar de tamanha incapacidade de minha parte, este 
-//código contém a lógica principal da geração e movimento das peças, além de checar se as peças estão
-//no bottom ou não e gerar uma nova (provavelmente nada funciona!)
 module logica(
   input CLOCK_50,
   input [3:0] KEY,
