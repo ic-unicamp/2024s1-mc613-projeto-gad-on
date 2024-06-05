@@ -79,7 +79,7 @@ always @(posedge CLOCK_50) begin
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b000010111110101111000000000) begin //Acelerado 8 vezes
+	if (count_shape ==  29'b010111110101111000000000000) begin //Acelerar 8 vezes
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
@@ -96,6 +96,8 @@ end
 
 
 reg def3 = 0;
+reg def4 = 0;
+reg paint = 0;
 reg[11:0] x_shape;
 reg[11:0] y_shape;
 reg[11:0] temp;
@@ -108,15 +110,17 @@ reg[3:0] op_passada;
 reg [0:49] map [0:19];
 reg [0:49] new = 0;
 reg [9:0] i1 = 0, j1 = 0;
+reg [9:0] shape_id = 0;
+reg [9:0] rot_id = 0;
 
-always @(posedge CLOCK_50) begin 
+always @(posedge VGA_CLK) begin 
 	//linha, coluna, respectivamente map[linha][coluna*5+:4]
 	//aqui, coloquei um pixel como sendo 1
 	if(~def3) begin
 		y_shape <= 0;
-		x_shape <= 0;
+		x_shape <= 20;
 		bottom <= 0;
-		map[y_shape][x_shape+:5] <= 11;
+		rot_id = 1;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
 		def3 <= 1;
@@ -129,42 +133,61 @@ always @(posedge CLOCK_50) begin
 		faz_alguma_coisa <= 0;
 	end
 	
-	if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
-		if(~KEY[1] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0) begin
-			map[y_shape][(x_shape-5)+:5] <= 11;
-			map[y_shape][x_shape+:5] <= 0;
-			x_shape <= x_shape - 5;
-		end
-		else if(~KEY[0] && x_shape < 45 && map[y_shape][(x_shape+5)+:5] == 0) begin
-			map[y_shape][(x_shape+5)+:5] <= 11;
-			map[y_shape][x_shape+:5] <= 0;
-			x_shape <= x_shape + 5;
-		end
-	end
-
-	op_passada <= KEY;
-	
-	if(map[y_shape+1][x_shape+:5] != 0 || y_shape == 19) begin 
-		map[y_shape][x_shape+:5] <= map[y_shape][x_shape+:5] - 10;
-		y_shape <= 0;
-		x_shape <= 0;
-		map[y_shape][x_shape+:5] <= 11;
-		bottom <= 1;
-	end
-	for(i1 = 19; i1 > 0; i1  = i1-1) begin
-		if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
-			for(j1 = i1; j1 > 0; j1 = j1-1) begin
-				map[j1] <= map[j1-1];
+	case(shape_id)
+		0: begin
+		
+		map[y_shape][x_shape+:5] <= 13;
+		map[y_shape][(x_shape+5)+:5] <= 13;
+		map[y_shape+1][x_shape+:5] <= 13;
+		map[y_shape+1][(x_shape+5)+:5] <= 13;
+		
+		if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
+				if(~KEY[1] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
+					map[y_shape][(x_shape+5)+:5] <= 0;
+					map[y_shape+1][(x_shape+5)+:5] <= 0;
+					x_shape <= x_shape - 5;
+				end
+				else if(~KEY[0] && x_shape < 40 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape+10)+:5] == 0) begin
+					map[y_shape][(x_shape)+:5] <= 0;
+					map[y_shape+1][(x_shape)+:5] <= 0;
+					x_shape <= x_shape + 5;
+				end
 			end
-			map[0] <= new;
+
+			op_passada <= KEY;
+			
+			if(map[y_shape+2][x_shape+:5] != 0 || map[y_shape+2][(x_shape+5)+:5] != 0 || y_shape == 18) begin 
+				
+				map[y_shape][x_shape+:5] <= map[y_shape][x_shape+:5] - 10;
+				map[y_shape][(x_shape+5)+:5] <= map[y_shape][(x_shape+5)+:5] - 10;
+				map[y_shape+1][x_shape+:5] <= map[y_shape+1][x_shape+:5] - 10;
+				map[y_shape+1][(x_shape+5)+:5] <= map[y_shape+1][(x_shape+5)+:5] - 10;
+				
+				y_shape <= 0;
+				x_shape <= 20;
+				bottom <= 1;
+			end
+			for(i1 = 19; i1 > 0; i1  = i1-1) begin
+				if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
+					for(j1 = i1; j1 > 0; j1 = j1-1) begin
+						map[j1] <= map[j1-1];
+					end
+					map[0] <= new;
+				end
+			end
+			
+			if (~SHAPE_CLK ) begin 
+				map[y_shape][x_shape+:5] <= 0;
+				map[y_shape][(x_shape+5)+:5] <= 0;
+				map[y_shape+1][x_shape+:5] <= 0;
+				map[y_shape+1][(x_shape+5)+:5] <= 0;
+				y_shape <= y_shape + 1;
+				bottom <= 0;
+			end
+			
 		end
-	end
-	if (~SHAPE_CLK ) begin 
-		map[y_shape][x_shape+:5] <= 0;
-		map[y_shape+1][x_shape+:5] <= 11;
-		y_shape <= y_shape + 1;
-		bottom <= 0;
-	end
+	endcase
+		
 	
 	
 end
