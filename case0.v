@@ -1,5 +1,5 @@
 //Infelizmente o rastro das peças fica com uma cor diferente de amarelo ou cinza
-
+// [LEMBRETE] Alterar o if(~SHAPE_CLK) para consertar alguns casos limpezas de rastro incorretas
 0: begin
 		
 			map[y_shape][x_shape+:5] <= 13;
