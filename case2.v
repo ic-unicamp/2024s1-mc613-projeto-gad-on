@@ -93,7 +93,7 @@
 						
 						x_shape <= x_shape - 5;
 					end
-					else if(~KEY[0] && x_shape < 45 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape+10)+:5] == 0) begin
+					else if(~KEY[0] && x_shape < 40 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape+10)+:5] == 0) begin
 						map[y_shape-1][x_shape+:5] <= 0;
 						map[y_shape][x_shape+:5] <= 0;
 						map[y_shape][(x_shape+5)+:5] <= 0;
