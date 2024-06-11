@@ -22,7 +22,7 @@
 						map[y_shape+1][x_shape+:5] <= 5;
 						map[y_shape+2][(x_shape)+:5] <= 5;
 						
-						y_shape <= 1;
+						y_shape <= 0;
 						x_shape <= 20;
 						bottom <= 1;
 					end
@@ -66,7 +66,7 @@
 						map[y_shape][(x_shape+5)+:5] <= 5;
 						map[y_shape][(x_shape+10)+:5] <= 5;	
 						
-						y_shape <= 1;
+						y_shape <= 0;
 						x_shape <= 20;
 						bottom <= 1;
 						rot_id <= 0;
