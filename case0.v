@@ -1,21 +1,10 @@
-//Infelizmente o rastro das peças fica com uma cor diferente de amarelo ou cinza
-// [LEMBRETE] Alterar o if(~SHAPE_CLK) para consertar alguns casos limpezas de rastro incorretas
-0: begin
-		
-			map[y_shape][x_shape+:5] <= 13;
-			map[y_shape][(x_shape+5)+:5] <= 13;
-			map[y_shape+1][x_shape+:5] <= 13;
-			map[y_shape+1][(x_shape+5)+:5] <= 13;
-			
+		0: begin // cor = 13
+					
 			if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
 				if(~KEY[1] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
-					map[y_shape][(x_shape+5)+:5] <= 0;
-					map[y_shape+1][(x_shape+5)+:5] <= 0;
 					x_shape <= x_shape - 5;
 				end
 				else if(~KEY[0] && x_shape < 40 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape+10)+:5] == 0) begin
-					map[y_shape][(x_shape)+:5] <= 0;
-					map[y_shape+1][(x_shape)+:5] <= 0;
 					x_shape <= x_shape + 5;
 				end
 			end
@@ -23,7 +12,6 @@
 			op_passada <= KEY;
 			
 			if(map[y_shape+2][x_shape+:5] != 0 || map[y_shape+2][(x_shape+5)+:5] != 0 || y_shape == 18) begin 
-				
 				map[y_shape][x_shape+:5] <= 3;
 				map[y_shape][(x_shape+5)+:5] <= 3;
 				map[y_shape+1][x_shape+:5] <= 3;
@@ -43,8 +31,6 @@
 			end
 			
 			if (~SHAPE_CLK ) begin 
-				map[y_shape][x_shape+:5] <= 0;
-				map[y_shape][(x_shape+5)+:5] <= 0;
 				y_shape <= y_shape + 1;
 				bottom <= 0;
 			end
