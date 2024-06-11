@@ -1,4 +1,5 @@
 //Bug do score corrigido, best_score está perfeito
+//Quando dá ALM > 50% a peça fica indo pra cima e pra baixo
 module vgaproj(
   input CLOCK_50,
   input [3:0] KEY,
@@ -79,7 +80,7 @@ always @(posedge CLOCK_50) begin
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b010111110101111000000000000) begin //Acelerar 8 vezes
+	if (count_shape ==  29'b001011111010111100000000000) begin //Acelerar 4 vezes -> tirar 2 zeros a direita
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
@@ -97,9 +98,10 @@ end
 
 reg def3 = 0;
 reg def4 = 0;
+reg rodoufo = 0;
 reg paint = 0;
-reg[11:0] x_shape;
-reg[11:0] y_shape;
+reg[11:0] x_shape = 20;
+reg[11:0] y_shape = 1;
 reg[11:0] temp;
 reg bottom;
 reg faz_alguma_coisa;
@@ -117,10 +119,11 @@ always @(posedge VGA_CLK) begin
 	//linha, coluna, respectivamente map[linha][coluna*5+:4]
 	//aqui, coloquei um pixel como sendo 1
 	if(~def3) begin
-		y_shape <= 0;
+		y_shape <= 1;
 		x_shape <= 20;
 		bottom <= 0;
-		rot_id = 1;
+		shape_id <= num_shape;
+		rot_id <= 0;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
 		def3 <= 1;
@@ -134,22 +137,14 @@ always @(posedge VGA_CLK) begin
 	end
 	
 	case(shape_id)
-		0: begin
-		
-		map[y_shape][x_shape+:5] <= 13;
-		map[y_shape][(x_shape+5)+:5] <= 13;
-		map[y_shape+1][x_shape+:5] <= 13;
-		map[y_shape+1][(x_shape+5)+:5] <= 13;
-		
-		if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
+	
+		0: begin // cor = 13
+					
+			if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
 				if(~KEY[1] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
-					map[y_shape][(x_shape+5)+:5] <= 0;
-					map[y_shape+1][(x_shape+5)+:5] <= 0;
 					x_shape <= x_shape - 5;
 				end
 				else if(~KEY[0] && x_shape < 40 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape+10)+:5] == 0) begin
-					map[y_shape][(x_shape)+:5] <= 0;
-					map[y_shape+1][(x_shape)+:5] <= 0;
 					x_shape <= x_shape + 5;
 				end
 			end
@@ -157,15 +152,15 @@ always @(posedge VGA_CLK) begin
 			op_passada <= KEY;
 			
 			if(map[y_shape+2][x_shape+:5] != 0 || map[y_shape+2][(x_shape+5)+:5] != 0 || y_shape == 18) begin 
-				
-				map[y_shape][x_shape+:5] <= map[y_shape][x_shape+:5] - 10;
-				map[y_shape][(x_shape+5)+:5] <= map[y_shape][(x_shape+5)+:5] - 10;
-				map[y_shape+1][x_shape+:5] <= map[y_shape+1][x_shape+:5] - 10;
-				map[y_shape+1][(x_shape+5)+:5] <= map[y_shape+1][(x_shape+5)+:5] - 10;
+				map[y_shape][x_shape+:5] <= 3;
+				map[y_shape][(x_shape+5)+:5] <= 3;
+				map[y_shape+1][x_shape+:5] <= 3;
+				map[y_shape+1][(x_shape+5)+:5] <= 3;
 				
 				y_shape <= 0;
 				x_shape <= 20;
 				bottom <= 1;
+				shape_id <= num_shape;
 			end
 			for(i1 = 19; i1 > 0; i1  = i1-1) begin
 				if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
@@ -177,15 +172,101 @@ always @(posedge VGA_CLK) begin
 			end
 			
 			if (~SHAPE_CLK ) begin 
-				map[y_shape][x_shape+:5] <= 0;
-				map[y_shape][(x_shape+5)+:5] <= 0;
-				map[y_shape+1][x_shape+:5] <= 0;
-				map[y_shape+1][(x_shape+5)+:5] <= 0;
 				y_shape <= y_shape + 1;
 				bottom <= 0;
 			end
-			
 		end
+		
+	  1: begin
+					
+				if(rot_id == 0) begin
+					
+					if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
+						if(~KEY[1] && x_shape > 0 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0 && map[y_shape+2][(x_shape-5)+:5] == 0) begin
+							x_shape <= x_shape - 5;
+						end
+						else if(~KEY[0] && x_shape < 45 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0 && map[y_shape+2][(x_shape+5)+:5] == 0) begin
+							x_shape <= x_shape + 5;
+						end
+						else if(~KEY[2] && x_shape > 0 && x_shape < 40 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+10)+:5] == 0) begin
+							rot_id <= 1;				
+						end
+					end
+
+					op_passada <= KEY;
+					
+					if(map[y_shape+3][x_shape+:5] != 0 || y_shape == 17) begin 
+						map[y_shape-1][x_shape+:5] <= 5;
+						map[y_shape][x_shape+:5] <= 5;
+						map[y_shape+1][x_shape+:5] <= 5;
+						map[y_shape+2][(x_shape)+:5] <= 5;
+						
+						y_shape <= 0;
+						x_shape <= 20;
+						bottom <= 1;
+						shape_id <= num_shape;
+					end
+					for(i1 = 19; i1 > 0; i1  = i1-1) begin
+						if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
+							for(j1 = i1; j1 > 0; j1 = j1-1) begin
+								map[j1] <= map[j1-1];
+							end
+							map[0] <= new;
+						end
+					end
+					
+					if (~SHAPE_CLK) begin 
+						y_shape <= y_shape + 1;
+						bottom <= 0;
+					end
+				end
+				
+				
+				
+				else begin
+				
+					if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
+						if(~KEY[1] && x_shape > 5 && map[y_shape][(x_shape-10)+:5] == 0) begin				
+							x_shape <= x_shape - 5;
+						end
+						else if(~KEY[0] && x_shape < 35 && map[y_shape][(x_shape+15)+:5] == 0) begin
+							x_shape <= x_shape + 5;
+						end
+						else if(~KEY[2] && x_shape > 0 && x_shape < 50 && y_shape < 18 && map[y_shape-1][(x_shape)+:5] == 0 && map[y_shape+1][(x_shape)+:5] == 0 && map[y_shape+2][(x_shape)+:5] == 0) begin
+							rot_id <= 0;
+						end
+					end
+
+					op_passada <= KEY;
+					
+					if(map[y_shape+1][(x_shape-5)+:5] != 0 || map[y_shape+1][(x_shape)+:5] != 0 || map[y_shape+1][(x_shape+5)+:5] != 0 || map[y_shape+1][(x_shape+10)+:5] != 0 || y_shape == 19) begin 
+							
+						map[y_shape][(x_shape-5)+:5] <= 5;
+						map[y_shape][(x_shape)+:5] <= 5;
+						map[y_shape][(x_shape+5)+:5] <= 5;
+						map[y_shape][(x_shape+10)+:5] <= 5;	
+						
+						y_shape <= 0;
+						x_shape <= 20;
+						bottom <= 1;
+						rot_id <= 0;
+						shape_id <= num_shape;
+					end
+					for(i1 = 19; i1 > 0; i1  = i1-1) begin
+						if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
+							for(j1 = i1; j1 > 0; j1 = j1-1) begin
+								map[j1] <= map[j1-1];
+							end
+							map[0] <= new;
+						end
+					end
+					if(~SHAPE_CLK) begin
+						y_shape <= y_shape + 1;
+						bottom <= 0;
+					end
+				end
+			end
+
 	endcase
 		
 	
@@ -272,11 +353,78 @@ always @(*) begin
                         VGA_B = 0;
                     end
                 endcase
+					case(shape_id)
+						0: begin //Quadrado = Amarelo
+							if((i == y_shape && j*5 == x_shape) || (i == y_shape && j*5 == x_shape+5) ||  (i == y_shape+1 && j*5 == x_shape) || (i == y_shape+1 && j*5 == x_shape+5)) begin
+								VGA_R = ativo ? 255 : 0;
+								VGA_G = ativo ? 255 : 0;
+								VGA_B = ativo ? 0 : 0;
+							end
+						end
+						1: begin // Barra = Verde
+							if(rot_id == 0 && ((i == y_shape-1) || (i == y_shape) || (i == y_shape+1) || (i == y_shape+2)) && 5*j == x_shape) begin
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+							else if(rot_id == 1 && (i == y_shape) && ((5*j == x_shape-5) || (5*j == x_shape) || (5*j == x_shape+5) || (5*j == x_shape+10))) begin
+								VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+						end
+						2: begin // S = Ciano
+							if(rot_id == 0 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape+5))) begin
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 255 : 0;
+							end
+							else if(rot_id == 1 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape+1 && 5*j == x_shape+5))) begin
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 255 : 0;
+                        VGA_B = ativo ? 255 : 0;
+							end
+						end
+						3: begin // Z = azul
+							if(rot_id == 0 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape-1 &&  5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape))) begin
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 0 : 0;
+                        VGA_B = ativo ? 255 : 0;
+							end
+							else if(rot_id == 1 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape+1 && 5*j == x_shape-5))) begin
+                        VGA_R = ativo ? 0 : 0;
+                        VGA_G = ativo ? 0 : 0;
+                        VGA_B = ativo ? 255 : 0;
+							end
+						end
+						4: begin // L = laranja
+							if(rot_id == 0 && ((i == y_shape-1 && 5*j == x_shape) || (i == y_shape && 5*j == x_shape) || (i == y_shape+1 &&  5*j == x_shape) || (i == y_shape+1 && 5*j == x_shape+5))) begin
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+							else if(rot_id == 1 && ((i == y_shape && 5*j == x_shape-5) || (i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape+1 && 5*j == x_shape-5))) begin
+                        VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+							else if(rot_id == 2 && ((i == y_shape && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape-5) || (i == y_shape+1 && 5*j == x_shape))) begin
+								VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+							else if(rot_id == 3 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape-1 && 5*j == x_shape+5))) begin
+								VGA_R = ativo ? 255 : 0;
+                        VGA_G = ativo ? 127 : 0;
+                        VGA_B = ativo ? 0 : 0;
+							end
+						end
+					endcase
             end
         end
     end
 	end
-	//else if x, y dentro da regiao da bag ou do carrosel (sera implementado futuramente)
+	//else if x, y dentro da regiao da bag ou do carrosel (NAO sera implementado futuramente)
 	else begin 
 		VGA_R = ativo ? 128 : 0;
 		VGA_G = ativo ? 0 : 0;
