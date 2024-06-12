@@ -1,5 +1,5 @@
 //Bug do score corrigido, best_score está perfeito
-//Quando dá ALM > 50% a peça fica indo pra cima e pra baixo
+//Infelizmente o rastro das peças fica com uma cor diferente de amarelo ou cinza
 module vgaproj(
   input CLOCK_50,
   input [3:0] KEY,
@@ -80,14 +80,20 @@ always @(posedge CLOCK_50) begin
 		SHAPE_CLK <= 0;
 		def5 = 1;
 	end
-	if (count_shape ==  29'b001011111010111100000000000) begin //Acelerar 4 vezes -> tirar 2 zeros a direita
+	if (count_shape ==  29'b000101111101011110000000000) begin //Acelerar 2 vezes -> tirar 1 zeros a direita
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 	end 
 	else begin
 		count_shape <= count_shape + 1;
 		SHAPE_CLK <= 1;
-		num_shape <= num_shape + 1;
+	end
+	
+	if(num_shape == 2) begin
+		num_shape <= 0;
+	end
+	else begin
+		num_shape <= num_shape+1;
 	end
 end
 
@@ -157,7 +163,7 @@ always @(posedge VGA_CLK) begin
 				map[y_shape+1][x_shape+:5] <= 3;
 				map[y_shape+1][(x_shape+5)+:5] <= 3;
 				
-				y_shape <= 0;
+				y_shape <= 1;
 				x_shape <= 20;
 				bottom <= 1;
 				shape_id <= num_shape;
@@ -201,7 +207,7 @@ always @(posedge VGA_CLK) begin
 						map[y_shape+1][x_shape+:5] <= 5;
 						map[y_shape+2][(x_shape)+:5] <= 5;
 						
-						y_shape <= 0;
+						y_shape <= 1;
 						x_shape <= 20;
 						bottom <= 1;
 						shape_id <= num_shape;
@@ -246,7 +252,7 @@ always @(posedge VGA_CLK) begin
 						map[y_shape][(x_shape+5)+:5] <= 5;
 						map[y_shape][(x_shape+10)+:5] <= 5;	
 						
-						y_shape <= 0;
+						y_shape <= 1;
 						x_shape <= 20;
 						bottom <= 1;
 						rot_id <= 0;
