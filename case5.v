@@ -3,24 +3,24 @@
 			if(rot_id == 0) begin
 				
 				if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
-          if(~KEY[1] && x_shape > 5 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-10)+:5] == 0) begin
+					if(~KEY[1] && x_shape > 5 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-10)+:5] == 0) begin
 						x_shape <= x_shape - 5;
 					end
-          else if(~KEY[0] && x_shape < 45 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0) begin
+					else if(~KEY[0] && x_shape < 45 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0) begin
 						x_shape <= x_shape + 5;
 					end
-          else if(~KEY[2] && x_shape < 45 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
+					else if(~KEY[2] && x_shape < 45 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0) begin
 						rot_id <= 1;				
 					end
 				end
 
 				op_passada <= KEY;
 				
-				if(map[y_shape+2][(x_shape+5)+:5] != 0 || map[y_shape+2][x_shape+:5] != 0 || y_shape == 18) begin 
+				if(map[y_shape+2][(x_shape-5)+:5] != 0 || map[y_shape+2][x_shape+:5] != 0 || y_shape == 18) begin 
 					map[y_shape-1][x_shape+:5] <= 8;
 					map[y_shape][(x_shape)+:5] <= 8;
 					map[y_shape+1][(x_shape)+:5] <= 8;
-					map[y_shape+1][(x_shape+5)+:5] <= 8;
+					map[y_shape+1][(x_shape-5)+:5] <= 8;
 					
 					y_shape <= 1;
 					x_shape <= 20;
@@ -46,24 +46,24 @@
 			else if(rot_id == 1) begin
 			
 				if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
-					if(~KEY[1] && x_shape > 5 && map[y_shape][(x_shape-10)+:5] == 0 && map[y_shape+1][(x_shape-10)+:5] == 0) begin
+					if(~KEY[1] && x_shape > 5 && map[y_shape][(x_shape-10)+:5] == 0 && map[y_shape-1][(x_shape-10)+:5] == 0) begin
 						x_shape <= x_shape - 5;
 					end
-					else if(~KEY[0] && x_shape < 40 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape+1][(x_shape)+:5] == 0) begin
+					else if(~KEY[0] && x_shape < 40 && map[y_shape][(x_shape+10)+:5] == 0 && map[y_shape-1][(x_shape)+:5] == 0) begin
 						x_shape <= x_shape + 5;
 					end
-					else if(~KEY[2] && y_shape > 0 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape-1][(x_shape)+:5] == 0 && map[y_shape+1][(x_shape)+:5] == 0) begin
+					else if(~KEY[2] && y_shape < 19 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape-1][(x_shape)+:5] == 0 && map[y_shape+1][(x_shape)+:5] == 0) begin
 						rot_id <= 2;				
 					end
 				end
 
 				op_passada <= KEY;
 				
-				if(map[y_shape+2][(x_shape-5)+:5] != 0 || map[y_shape+1][x_shape+:5] != 0 || map[y_shape+1][(x_shape+5)+:5] != 0 || y_shape == 18) begin 
+				if(map[y_shape+1][(x_shape-5)+:5] != 0 || map[y_shape+1][x_shape+:5] != 0 || map[y_shape+1][(x_shape+5)+:5] != 0 || y_shape == 19) begin 
 					map[y_shape][x_shape+:5] <= 8;
 					map[y_shape][(x_shape-5)+:5] <= 8;
 					map[y_shape][(x_shape+5)+:5] <= 8;
-					map[y_shape+1][(x_shape-5)+:5] <= 8;
+					map[y_shape-1][(x_shape-5)+:5] <= 8;
 					
 					y_shape <= 1;
 					x_shape <= 20;
@@ -90,22 +90,22 @@
 		else if(rot_id == 2) begin
 				
 				if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
-					if(~KEY[1] && x_shape > 0 && map[y_shape-1][(x_shape-10)+:5] == 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
+					if(~KEY[1] && x_shape > 0 && map[y_shape-1][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape+1][(x_shape-5)+:5] == 0) begin
 						x_shape <= x_shape - 5;
 					end
-					else if(~KEY[0] && x_shape < 40 && map[y_shape-1][(x_shape+5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0) begin
+					else if(~KEY[0] && x_shape < 40 && map[y_shape-1][(x_shape+10)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0) begin
 						x_shape <= x_shape + 5;
 					end
-					else if(~KEY[2] && x_shape < 45 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape-1][(x_shape+5)+:5] == 0) begin
+					else if(~KEY[2] && x_shape > 0 && map[y_shape][(x_shape-5)+:5] == 0 && map[y_shape][(x_shape+5)+:5] == 0 && map[y_shape+1][(x_shape+5)+:5] == 0) begin
 						rot_id <= 3;				
 					end
 				end
 
 				op_passada <= KEY;
 				
-				if(map[y_shape][(x_shape-5)+:5] != 0 || map[y_shape+2][x_shape+:5] != 0 || y_shape == 18) begin 
+			if(map[y_shape][(x_shape+5)+:5] != 0 || map[y_shape+2][x_shape+:5] != 0 || y_shape == 18) begin 
 					map[y_shape-1][x_shape+:5] <= 8;
-					map[y_shape-1][(x_shape-5)+:5] <= 8;
+					map[y_shape-1][(x_shape+5)+:5] <= 8;
 					map[y_shape][(x_shape)+:5] <= 8;
 					map[y_shape+1][(x_shape)+:5] <= 8;
 					
