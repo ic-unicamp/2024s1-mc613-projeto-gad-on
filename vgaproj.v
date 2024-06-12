@@ -70,14 +70,14 @@ assign  y = linhas - 35;
 
 reg def5 = 0;
 reg [28:0] count_shape = 0;
-reg [3:0] num_shape = 0;
 reg SHAPE_CLK;
+reg [3:0] num_shape = 0;
 
 always @(posedge CLOCK_50) begin
 	if(SW[0] || ~def5) begin
 		count_shape <= 0;
-		num_shape <= 0;
 		SHAPE_CLK <= 0;
+		num_shape <= 0;
 		def5 = 1;
 	end
 	if (count_shape ==  29'b000101111101011110000000000) begin //Acelerar 2 vezes -> tirar 1 zeros a direita
@@ -93,7 +93,7 @@ always @(posedge CLOCK_50) begin
 		num_shape <= 0;
 	end
 	else begin
-		num_shape <= num_shape+1;
+		num_shape <= num_shape + 1;
 	end
 end
 
@@ -121,14 +121,15 @@ reg [9:0] i1 = 0, j1 = 0;
 reg [9:0] shape_id = 0;
 reg [9:0] rot_id = 0;
 
+
 always @(posedge VGA_CLK) begin 
 	//linha, coluna, respectivamente map[linha][coluna*5+:4]
 	//aqui, coloquei um pixel como sendo 1
-	if(~def3) begin
+	if(~def3 || SW[9]) begin
 		y_shape <= 1;
 		x_shape <= 20;
 		bottom <= 0;
-		shape_id <= num_shape;
+		shape_id <= 0;
 		rot_id <= 0;
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
@@ -166,7 +167,8 @@ always @(posedge VGA_CLK) begin
 				y_shape <= 1;
 				x_shape <= 20;
 				bottom <= 1;
-				shape_id <= num_shape;
+				
+				shape_id <= 1;
 			end
 			for(i1 = 19; i1 > 0; i1  = i1-1) begin
 				if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
@@ -184,7 +186,8 @@ always @(posedge VGA_CLK) begin
 		end
 		
 	  1: begin
-					
+	  
+
 				if(rot_id == 0) begin
 					
 					if(faz_alguma_coisa) begin //movimento para os lados (mef com keys)
@@ -210,7 +213,8 @@ always @(posedge VGA_CLK) begin
 						y_shape <= 1;
 						x_shape <= 20;
 						bottom <= 1;
-						shape_id <= num_shape;
+						
+						shape_id <= 0;
 					end
 					for(i1 = 19; i1 > 0; i1  = i1-1) begin
 						if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
@@ -256,7 +260,8 @@ always @(posedge VGA_CLK) begin
 						x_shape <= 20;
 						bottom <= 1;
 						rot_id <= 0;
-						shape_id <= num_shape;
+						
+						shape_id <= 0;
 					end
 					for(i1 = 19; i1 > 0; i1  = i1-1) begin
 						if(map[i1][0:4] && map[i1][5:9] && map[i1][10:14] && map[i1][15:19] && map[i1][20:24] && map[i1][25:29] && map[i1][30:34] && map[i1][35:39] && map[i1][40:44] && map[i1][45:49] && bottom) begin
@@ -294,7 +299,7 @@ wire[11:0] y_map;
 assign x_map = 320-9-76;
 assign y_map = 10;
 
-always @(*) begin
+always @(posedge VGA_CLK) begin
 
 
 	if(x >= x_map && x < x_map +190 && y >= y_map && y < y_map + 460) begin
@@ -367,7 +372,7 @@ always @(*) begin
 								VGA_B = ativo ? 0 : 0;
 							end
 						end
-						1: begin // Barra = Verde
+						1: begin // Barra = verde
 							if(rot_id == 0 && ((i == y_shape-1) || (i == y_shape) || (i == y_shape+1) || (i == y_shape+2)) && 5*j == x_shape) begin
                         VGA_R = ativo ? 0 : 0;
                         VGA_G = ativo ? 255 : 0;
@@ -379,7 +384,7 @@ always @(*) begin
                         VGA_B = ativo ? 0 : 0;
 							end
 						end
-						2: begin // S = Ciano
+						2: begin // S = ciano
 							if(rot_id == 0 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape+5))) begin
                         VGA_R = ativo ? 0 : 0;
                         VGA_G = ativo ? 255 : 0;
@@ -391,40 +396,7 @@ always @(*) begin
                         VGA_B = ativo ? 255 : 0;
 							end
 						end
-						3: begin // Z = azul
-							if(rot_id == 0 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape-1 &&  5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape))) begin
-                        VGA_R = ativo ? 0 : 0;
-                        VGA_G = ativo ? 0 : 0;
-                        VGA_B = ativo ? 255 : 0;
-							end
-							else if(rot_id == 1 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape+1 && 5*j == x_shape-5))) begin
-                        VGA_R = ativo ? 0 : 0;
-                        VGA_G = ativo ? 0 : 0;
-                        VGA_B = ativo ? 255 : 0;
-							end
-						end
-						4: begin // L = laranja
-							if(rot_id == 0 && ((i == y_shape-1 && 5*j == x_shape) || (i == y_shape && 5*j == x_shape) || (i == y_shape+1 &&  5*j == x_shape) || (i == y_shape+1 && 5*j == x_shape+5))) begin
-                        VGA_R = ativo ? 255 : 0;
-                        VGA_G = ativo ? 127 : 0;
-                        VGA_B = ativo ? 0 : 0;
-							end
-							else if(rot_id == 1 && ((i == y_shape && 5*j == x_shape-5) || (i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape+1 && 5*j == x_shape-5))) begin
-                        VGA_R = ativo ? 255 : 0;
-                        VGA_G = ativo ? 127 : 0;
-                        VGA_B = ativo ? 0 : 0;
-							end
-							else if(rot_id == 2 && ((i == y_shape && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape) || (i == y_shape-1 && 5*j == x_shape-5) || (i == y_shape+1 && 5*j == x_shape))) begin
-								VGA_R = ativo ? 255 : 0;
-                        VGA_G = ativo ? 127 : 0;
-                        VGA_B = ativo ? 0 : 0;
-							end
-							else if(rot_id == 3 && ((i == y_shape && 5*j == x_shape) || (i == y_shape && 5*j == x_shape-5) || (i == y_shape && 5*j == x_shape+5) || (i == y_shape-1 && 5*j == x_shape+5))) begin
-								VGA_R = ativo ? 255 : 0;
-                        VGA_G = ativo ? 127 : 0;
-                        VGA_B = ativo ? 0 : 0;
-							end
-						end
+					
 					endcase
             end
         end
@@ -441,3 +413,4 @@ always @(*) begin
 end
 
 endmodule
+
