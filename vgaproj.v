@@ -33,7 +33,7 @@ reg [11:0] linhas;
 reg [25:0] number;
 
 always @(posedge VGA_CLK) begin
-	if(SW[0] || ~def1) begin
+	if(SW[9] || ~def1) begin
 		contador = 0;
 		linhas = 0;
 		def1 = 1;
@@ -74,7 +74,7 @@ reg SHAPE_CLK;
 reg [3:0] num_shape = 0;
 
 always @(posedge CLOCK_50) begin
-	if(SW[0] || ~def5) begin
+	if(SW[9] || ~def5) begin
 		count_shape <= 0;
 		SHAPE_CLK <= 0;
 		num_shape <= 0;
@@ -131,6 +131,7 @@ always @(posedge VGA_CLK) begin
 		bottom <= 0;
 		shape_id <= 0;
 		rot_id <= 0;
+		
 		op_passada <= 0;
 		faz_alguma_coisa <= 0;
 		def3 <= 1;
@@ -369,6 +370,7 @@ always @(posedge VGA_CLK) begin
 				end
 			end
 		end
+		
 
 	endcase
 		
@@ -488,7 +490,7 @@ always @(posedge VGA_CLK) begin
                         VGA_B = ativo ? 255 : 0;
 							end
 						end
-					
+						
 					endcase
             end
         end
